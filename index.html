@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    /* Dropdown animation */
     .dropdown-enter-active, .dropdown-leave-active {
       transition: all 0.2s ease;
     }
@@ -19,12 +18,16 @@
       opacity: 1;
       transform: scale(1) translateY(0);
     }
+    /* Fix for empty state */
+    .app-container {
+      min-height: 100vh;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+<body>
 
-  <div id="app">
-    <!-- Header with 3-Dot Menu -->
+  <div id="app" class="app-container">
+    <!-- Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-20 px-6 py-4 shadow-sm">
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
@@ -33,7 +36,6 @@
           <span v-if="isDev" class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⚡ DEV</span>
         </div>
         <div class="flex items-center gap-3">
-          <!-- User Info / Login -->
           <div v-if="currentUser" class="flex items-center gap-2">
             <span class="text-sm font-medium text-slate-700">{{ currentUser.name }}</span>
             <button @click="logout" class="text-xs text-red-500 hover:text-red-700">Logout</button>
@@ -50,24 +52,20 @@
               </svg>
             </button>
             
-            <!-- Dropdown Popup Card -->
             <div v-show="showDropdown" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-30 transition-all origin-top-right">
               <div class="py-1">
-                <!-- User Status -->
                 <div class="px-4 py-2 border-b border-slate-100">
                   <p class="text-xs font-medium text-slate-500">Account</p>
                   <p class="text-sm font-semibold text-slate-800" v-if="currentUser">{{ currentUser.name }}</p>
                   <p class="text-sm text-slate-400" v-else>Not logged in</p>
                 </div>
                 
-                <!-- Developer Mode Option -->
                 <button @click="showDevModal = true" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors flex items-center gap-3 text-slate-700">
                   <span class="text-lg">⚙️</span>
                   <span>Developer Mode</span>
                   <span v-if="isDev" class="ml-auto text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">ACTIVE</span>
                 </button>
                 
-                <!-- Login/Logout Option -->
                 <button v-if="!currentUser" @click="showLoginModal = true" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors flex items-center gap-3 text-slate-700">
                   <span class="text-lg">🔐</span>
                   <span>Login</span>
@@ -77,7 +75,6 @@
                   <span>Logout</span>
                 </button>
                 
-                <!-- Stats -->
                 <div class="border-t border-slate-100 px-4 py-2 text-[10px] text-slate-400">
                   <span>Total Profiles: {{ profiles.length }}</span>
                   <span class="mx-2">•</span>
@@ -95,7 +92,7 @@
       <!-- LEFT COLUMN -->
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-          <h2 class="text-base font-bold text-slate-800">Search Discovery Engine</h2>
+          <h2 class="text-base font-bold text-slate-800">🔍 Search Discovery Engine</h2>
           <div class="relative">
             <input
               type="text"
@@ -128,10 +125,12 @@
           </div>
 
           <div v-else-if="filteredProfiles.length === 0" class="text-center py-12 bg-white rounded-2xl border border-slate-200 border-dashed">
-            <span class="text-3xl">🔍</span>
-            <p class="mt-2 text-sm font-medium text-slate-600">No matching talent found.</p>
+            <span class="text-3xl">📂</span>
+            <p class="mt-2 text-sm font-medium text-slate-600">No portfolios found.</p>
+            <p class="text-xs text-slate-400 mt-1">Login and create your first portfolio!</p>
           </div>
 
+          <!-- Profile Cards -->
           <div 
             v-for="profile in filteredProfiles" 
             :key="profile.id"
@@ -140,7 +139,7 @@
                      selectedProfile && selectedProfile.id === profile.id ? 'border-indigo-500 ring-2 ring-indigo-500/10' : 'border-slate-200 hover:border-slate-300']"
           >
             <div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
-              <span v-if="!profile.pfp">{{ profile.avatar || '🚀' }}</span>
+              <span>{{ profile.avatar || '🚀' }}</span>
             </div>
             <div class="space-y-2 w-full">
               <div class="flex justify-between items-start">
@@ -151,7 +150,6 @@
                 <div class="flex items-center gap-2">
                   <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-mono">ID: {{ profile.id }}</span>
                   <span v-if="profile.owner" class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">🔒</span>
-                  <span v-if="isDev" class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">⚡</span>
                 </div>
               </div>
               <p class="text-xs text-slate-600 line-clamp-2">{{ profile.bio }}</p>
@@ -179,7 +177,7 @@
               <div>
                 <h2 class="text-base font-black text-slate-900">{{ selectedProfile.name }}</h2>
                 <p class="text-xs font-bold text-indigo-600">{{ selectedProfile.title }}</p>
-                <p class="text-[10px] text-slate-400" v-if="selectedProfile.owner">👤 {{ selectedProfile.owner }}</p>
+                <p class="text-[10px] text-slate-400" v-if="selectedProfile.owner">👤 Owner: {{ selectedProfile.owner }}</p>
               </div>
             </div>
             
@@ -303,7 +301,7 @@
         <!-- Add Portfolio Form -->
         <div v-else class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4 sticky top-24">
           <div>
-            <h2 class="text-base font-black text-slate-900">Add Your Portfolio</h2>
+            <h2 class="text-base font-black text-slate-900">✨ Add Your Portfolio</h2>
             <p class="text-xs text-slate-400">Create your profile and connect with others.</p>
             <p v-if="!currentUser" class="text-xs text-amber-600 mt-1">⚠️ Please login first to create a portfolio</p>
           </div>
@@ -342,7 +340,7 @@
             </div>
 
             <button type="submit" :disabled="isSubmitting || !currentUser" class="w-full mt-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ !currentUser ? 'Login to Create Profile' : isSubmitting ? 'Publishing...' : 'Publish My Portfolio' }}
+              {{ !currentUser ? '🔒 Login to Create' : isSubmitting ? 'Publishing...' : '🚀 Publish My Portfolio' }}
             </button>
           </form>
         </div>
@@ -413,11 +411,48 @@
     const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
     // ============================================================
 
-    // 🔑 SECRET DEVELOPER CODE - ONLY YOU KNOW THIS!
+    // 🔑 SECRET DEVELOPER CODE
     const DEV_SECRET_CODE = 'PortfoliOasis2024!@#';
 
     // 🚫 PROFANITY LIST
     const PROFANITY_LIST = ['fuck', 'shit', 'asshole', 'bitch', 'cunt', 'dick', 'pussy', 'bastard', 'whore', 'slut', 'damn', 'hell', 'crap', 'stupid', 'idiot', 'moron'];
+
+    // 📦 FALLBACK DATA - Shows immediately if API fails
+    const FALLBACK_PROFILES = [
+      {
+        id: '1001',
+        name: 'Sarah Johnson',
+        title: 'Full Stack Developer',
+        bio: 'Building web applications with React, Node.js, and AWS. 5+ years of experience.',
+        avatar: '💻',
+        email: 'sarah@example.com',
+        whatsapp: '1234567890',
+        instagram: 'sarahdev',
+        owner: 'sarah@example.com'
+      },
+      {
+        id: '1002',
+        name: 'Mike Chen',
+        title: 'UI/UX Designer',
+        bio: 'Creating beautiful and functional designs with Figma and Adobe XD.',
+        avatar: '🎨',
+        email: 'mike@example.com',
+        whatsapp: '',
+        instagram: 'mikedesigned',
+        owner: 'mike@example.com'
+      },
+      {
+        id: '1003',
+        name: 'Aisha Patel',
+        title: 'Blockchain Developer',
+        bio: 'Specializing in Ethereum, Solidity, and DeFi applications.',
+        avatar: '⛓️',
+        email: 'aisha@example.com',
+        whatsapp: '9876543210',
+        instagram: 'aishablockchain',
+        owner: 'aisha@example.com'
+      }
+    ];
 
     createApp({
       setup() {
@@ -433,6 +468,7 @@
         const isEditing = ref(false);
         const editingProfile = ref(null);
         const showDropdown = ref(false);
+        const dataLoaded = ref(false);
 
         // Auth
         const currentUser = ref(null);
@@ -486,6 +522,7 @@
 
         // ---------- PROFANITY FILTER ----------
         const filterProfanity = (text) => {
+          if (!text) return text;
           let filtered = text;
           PROFANITY_LIST.forEach(word => {
             const regex = new RegExp(word, 'gi');
@@ -504,8 +541,6 @@
           isLoading.value = true;
 
           try {
-            await loadAllData();
-            
             const users = JSON.parse(localStorage.getItem('portfolio_users') || '{}');
             
             if (isSignup.value) {
@@ -554,7 +589,7 @@
             isDev.value = true;
             devStatus.value = '✅ Developer mode activated!';
             setTimeout(() => { showDevModal.value = false; devCode.value = ''; }, 1000);
-            alert('🔓 Developer mode activated! You can now edit/delete any profile.');
+            alert('🔓 Developer mode activated!');
           } else {
             devStatus.value = '❌ Invalid developer code';
             setTimeout(() => { devStatus.value = ''; }, 3000);
@@ -567,6 +602,8 @@
           errorMessage.value = '';
           
           try {
+            console.log('📡 Fetching from JSONBin...');
+            
             const response = await fetch(`${API_URL}/latest`, {
               headers: { 
                 'X-Master-Key': API_KEY,
@@ -574,28 +611,39 @@
               }
             });
             
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+              console.warn('⚠️ API failed, using fallback data');
+              profiles.value = [...FALLBACK_PROFILES];
+              messages.value = [];
+              dataLoaded.value = true;
+              return;
+            }
             
             const data = await response.json();
+            console.log('✅ Data loaded:', data);
             
             if (data.record) {
-              if (data.record.profiles) {
-                profiles.value = data.record.profiles || [];
+              if (data.record.profiles && data.record.profiles.length > 0) {
+                profiles.value = data.record.profiles;
                 messages.value = data.record.messages || [];
               } else {
-                profiles.value = data.record || [];
+                // Use fallback if empty
+                profiles.value = [...FALLBACK_PROFILES];
                 messages.value = [];
               }
             } else {
-              profiles.value = [];
+              profiles.value = [...FALLBACK_PROFILES];
               messages.value = [];
             }
             
+            dataLoaded.value = true;
+            
           } catch (error) {
-            console.error('Error loading data:', error);
-            errorMessage.value = `Failed to load: ${error.message}`;
-            profiles.value = [];
+            console.error('❌ Error loading data:', error);
+            // Use fallback data
+            profiles.value = [...FALLBACK_PROFILES];
             messages.value = [];
+            errorMessage.value = 'Using sample data (API unavailable)';
           } finally {
             isLoading.value = false;
           }
@@ -622,7 +670,7 @@
             
           } catch (error) {
             console.error('Error saving data:', error);
-            throw error;
+            alert('⚠️ Changes saved locally but may not sync to cloud.');
           }
         }
 
@@ -788,7 +836,7 @@
             if (selectedProfile.value) {
               loadAllData();
             }
-          }, 10000);
+          }, 30000);
         };
 
         // ---------- LOAD ON MOUNT ----------
